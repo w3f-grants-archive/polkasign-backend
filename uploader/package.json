@@ -1,0 +1,14 @@
+{
+  "name": "uploader",
+  "version": "1.0.0",
+  "main": "subscribe.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@apollo/client": "^3.4.17",
+    "@polkadot/api": "^6.8.1",
+    "@polkadot/api-contract": "^6.8.1",
+    "axios": "^0.24.0",
+    "graphql": "^16.0.1"
+  }
+}

@@ -1,0 +1,56 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type AgreementInfo {
+  index: Int!
+  creator: String!
+  name: String!
+  create_at: String!
+  status: Int!
+  signers: String!
+  agreement_file: String!
+  sign_infos: String!
+  resources: String!
+}
+
+input PagingParam {
+  page: Int!
+  size: Int!
+  sortField: String!
+  order: String!
+}
+
+input Filter {
+  creator: String!
+  signer: String!
+  status: [Int!]!
+}
+
+type PagingResult {
+  page: Int!
+  size: Int!
+  total: Int!
+  data: [AgreementInfo!]!
+}
+
+type Query {
+  agreementInfos(filter: Filter!, page: PagingParam!): PagingResult!
+}
+
+input NewAgreementInfo {
+  index: Int!
+  creator: String!
+  name: String!
+  create_at: String!
+  status: Int!
+  signers: String!
+  agreement_file: String!
+  sign_infos: String!
+  resources: String!
+}
+
+type Mutation {
+  createAgreementInfo(input: NewAgreementInfo!): AgreementInfo!
+  updateAgreementInfo(input: NewAgreementInfo!): AgreementInfo!
+}
