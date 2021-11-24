@@ -7,11 +7,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 
 	"github.com/polkasign/polkasign-backend/graph/generated"
 	"github.com/polkasign/polkasign-backend/graph/model"
 	"github.com/polkasign/polkasign-backend/storage"
+	"gorm.io/gorm"
 )
 
 func (r *mutationResolver) CreateAgreementInfo(ctx context.Context, input model.NewAgreementInfo) (*model.AgreementInfo, error) {
@@ -20,6 +20,7 @@ func (r *mutationResolver) CreateAgreementInfo(ctx context.Context, input model.
 	if first.Error == gorm.ErrRecordNotFound {
 		item := &model.AgreementInfo{
 			Index:         input.Index,
+			TxID:          input.TxID,
 			Creator:       input.Creator,
 			Name:          input.Name,
 			CreateAt:      input.CreateAt,

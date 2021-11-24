@@ -26,19 +26,39 @@ const pair = keyring.addFromUri("model action demand click genius pizza pumpkin 
 console.log(keyring.pairs.length, 'pairs available');
 console.log(pair.meta.name, 'has address', pair.address);
 
-async function main () {
-    // Subscribe to system events via storage
-    api.query.system.events((events) => {
-        console.log(`\nReceived ${events.length} events:`);
+async function parseNewBlock(header) {
+    let blockHash = await api.rpc.chain.getBlockHash(header.number);
+    console.log(`Chain is at block hash: ${blockHash}`);
+    let block = await api.rpc.chain.getBlock(blockHash);
+    const allRecords = await api.query.system.events.at(blockHash);
+    // the information for each of the contained extrinsics
+    block.block.extrinsics.forEach((ex, index) => {
+        // the extrinsics are decoded by the API, human-like view
+        console.log("\tex index: ", index, "ex hash: ", ex.hash.toHex());
 
-        // Loop through the Vec<EventRecord>
-        events.forEach((record) => {
-            // Extract the phase, event and the event types
-            const { event, phase } = record;
-            const types = event.typeDef;
+        const { isSigned, meta, method: { args, method, section } } = ex;
+        // explicit display of name, args & documentation
+        console.log(`\t${section}.${method}(${args.map((a) => a.toString()).join(', ')})`);
 
-            // Show what we are busy with
-            console.log(`\t${event.section}:${event.method}:: (phase=${phase.toString()})`);
+        // signer/nonce info
+        if (isSigned) {
+            console.log(`\tsigner=${ex.signer.toString()}, nonce=${ex.nonce.toString()}`);
+        }
+
+        // filter the specific events based on the phase and then the
+        // index of our extrinsic in the block
+        console.log(`\twith event: ${section}.${method}`);
+        const events = allRecords
+            .filter(({ phase }) =>
+                phase.isApplyExtrinsic &&
+                phase.asApplyExtrinsic.eq(index)
+            )
+            .map(({ event }) => event);
+        if (events.length <= 0) {
+            return;
+        }
+        events.forEach((event) => {
+            console.log(`\thandle event: ${event.section}.${event.method}`);
             if("contracts" != event.section || "ContractEmitted" != event.method) {
                 return
             }
@@ -49,7 +69,7 @@ async function main () {
             let contractAddr = event.data[0].toString();
             console.log(`contract event from`, contractAddr)
             if (polkasign_address != contractAddr) {
-                console.log(`skip`)
+                console.log(`skip no listen addr`)
                 return;
             }
             let paredEvent = polkasignContract.abi.decodeEvent(event.data[1]);
@@ -58,7 +78,7 @@ async function main () {
             if("UpdateAgreementEvent" == paredEvent.event.identifier
                 || "CreateAgreementEvent" == paredEvent.event.identifier) {
                 console.log("event: " + paredEvent.event.identifier + ", , index:", agreementIndex)
-                queryAgreementInfo(agreementIndex);
+                queryAgreementInfo(agreementIndex, ex.hash.toHex());
             } else {
                 console.log("event: not found, skip", agreementIndex)
             }
@@ -66,7 +86,20 @@ async function main () {
     });
 }
 
-async function queryAgreementInfo(agreementIndex) {
+async function main () {
+    // We only display a couple, then unsubscribe
+    let count = 0;
+
+    // Subscribe to the new headers on-chain. The callback is fired when new headers
+    // are found, the call itself returns a promise with a subscription that can be
+    // used to unsubscribe from the newHead subscription
+    api.rpc.chain.subscribeNewHeads((header) => {
+        console.log(`Chain is at block: #${header.number}`);
+        parseNewBlock(header);
+    });
+}
+
+async function queryAgreementInfo(agreementIndex, txHash) {
     {
         console.log("========= begin to query queryAgreementById");
         const {gasConsumed, result, output} = await polkasignContract.query.queryAgreementById(pair.address,
@@ -76,19 +109,20 @@ async function queryAgreementInfo(agreementIndex) {
         console.log("gasConsumed", gasConsumed.toHuman());
         if (result.isOk) {
             // console.log('queryAgreementById Success', output.toHuman());
-            uploadAgreementInfo(output.toHuman())
+            uploadAgreementInfo(output.toHuman(), txHash)
         } else {
             console.error('queryAgreementById Error', result.toHuman());
         }
     }
 }
 
-function uploadAgreementInfo(info) {
+function uploadAgreementInfo(info, txHash) {
     let signers = `,` + info.signers.join(",") + `,`
     let body = {
         query: 'mutation {' +
             'createAgreementInfo(input: {' +
             'index: '+ info.index +',' +
+        'txId: "'+ txHash +'",' +
         'creator: "'+ info.creator +'",' +
         'name: "'+ info.name +'",' +
         'create_at: "'+ info.createAt +'",' +

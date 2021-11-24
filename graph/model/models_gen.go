@@ -4,6 +4,7 @@ package model
 
 type AgreementInfo struct {
 	Index         int    `json:"index"`
+	TxID          string `json:"txId"`
 	Creator       string `json:"creator"`
 	Name          string `json:"name"`
 	CreateAt      string `json:"create_at"`
@@ -22,6 +23,7 @@ type Filter struct {
 
 type NewAgreementInfo struct {
 	Index         int    `json:"index"`
+	TxID          string `json:"txId"`
 	Creator       string `json:"creator"`
 	Name          string `json:"name"`
 	CreateAt      string `json:"create_at"`

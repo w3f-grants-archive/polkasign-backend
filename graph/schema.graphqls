@@ -4,6 +4,7 @@
 
 type AgreementInfo {
   index: Int!
+  txId: String!
   creator: String!
   name: String!
   create_at: String!
@@ -40,6 +41,7 @@ type Query {
 
 input NewAgreementInfo {
   index: Int!
+  txId: String!
   creator: String!
   name: String!
   create_at: String!

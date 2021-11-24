@@ -24,14 +24,13 @@ nohup node subscribe.js &
 ```
 
 ## query agreementInfos
-graphql query
+### agreementInfos query
 ```json
-# Write your query or mutation here
 query {
 	agreementInfos(filter: {
-    creator: "",
+    creator: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     signer: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-    status: []
+    status: [0]
   },
   page: {
     page: 0,
@@ -90,6 +89,34 @@ result
         }
       ]
     }
+  }
+}
+```
+
+### createAgreementInfo
+
+```json
+mutation {
+  createAgreementInfo(input: {
+    index: 2000,
+    creator: "23333",
+    name: "123",
+    create_at: "1",
+    status: 1,
+    signers: ",123,",
+    agreement_file: "123",
+    sign_infos: "123",
+    resources: "123"
+  }){
+    index,
+    creator,
+    name,
+    create_at,
+    status,
+    signers,
+    agreement_file,
+    sign_infos,
+    resources
   }
 }
 ```

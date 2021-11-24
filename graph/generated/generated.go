@@ -53,6 +53,7 @@ type ComplexityRoot struct {
 		SignInfos     func(childComplexity int) int
 		Signers       func(childComplexity int) int
 		Status        func(childComplexity int) int
+		TxID          func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -157,6 +158,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AgreementInfo.Status(childComplexity), true
+
+	case "AgreementInfo.txId":
+		if e.complexity.AgreementInfo.TxID == nil {
+			break
+		}
+
+		return e.complexity.AgreementInfo.TxID(childComplexity), true
 
 	case "Mutation.createAgreementInfo":
 		if e.complexity.Mutation.CreateAgreementInfo == nil {
@@ -292,6 +300,7 @@ var sources = []*ast.Source{
 
 type AgreementInfo {
   index: Int!
+  txId: String!
   creator: String!
   name: String!
   create_at: String!
@@ -328,6 +337,7 @@ type Query {
 
 input NewAgreementInfo {
   index: Int!
+  txId: String!
   creator: String!
   name: String!
   create_at: String!
@@ -490,6 +500,41 @@ func (ec *executionContext) _AgreementInfo_index(ctx context.Context, field grap
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AgreementInfo_txId(ctx context.Context, field graphql.CollectedField, obj *model.AgreementInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AgreementInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TxID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AgreementInfo_creator(ctx context.Context, field graphql.CollectedField, obj *model.AgreementInfo) (ret graphql.Marshaler) {
@@ -2287,6 +2332,14 @@ func (ec *executionContext) unmarshalInputNewAgreementInfo(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "txId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("txId"))
+			it.TxID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "creator":
 			var err error
 
@@ -2425,6 +2478,11 @@ func (ec *executionContext) _AgreementInfo(ctx context.Context, sel ast.Selectio
 			out.Values[i] = graphql.MarshalString("AgreementInfo")
 		case "index":
 			out.Values[i] = ec._AgreementInfo_index(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "txId":
+			out.Values[i] = ec._AgreementInfo_txId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
