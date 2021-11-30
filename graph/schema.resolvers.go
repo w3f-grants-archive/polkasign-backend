@@ -70,8 +70,7 @@ func (r *mutationResolver) UpdateAgreementInfo(ctx context.Context, input model.
 func (r *queryResolver) AgreementInfos(ctx context.Context, filter model.Filter, page model.PagingParam) (*model.PagingResult, error) {
 	gdb := storage.GetGormDB()
 	var infos []*model.AgreementInfo
-	querySeg := gdb.Model(&model.AgreementInfo{}).Offset(page.Size * page.Page).
-		Limit(page.Size)
+	querySeg := gdb.Model(&model.AgreementInfo{})
 	if filter.Creator != "" {
 		querySeg.Where("creator = ?", filter.Creator)
 	}
@@ -89,6 +88,8 @@ func (r *queryResolver) AgreementInfos(ctx context.Context, filter model.Filter,
 	if err := querySeg.Count(&total).Error; err != nil {
 		return nil, err
 	}
+	querySeg.Offset(page.Size * page.Page).
+		Limit(page.Size)
 	if err := querySeg.Find(&infos).Error; err != nil {
 		return nil, err
 	}
