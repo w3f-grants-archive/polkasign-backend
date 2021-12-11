@@ -3,10 +3,10 @@ import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
 import { CodePromise, ContractPromise } from '@polkadot/api-contract';
 import {readFileSync} from "fs";
 import axios from "axios";
-const ws_endpoint = "ws://127.0.0.1:9944";
+const ws_endpoint = "ws://43.133.174.232:9944";
 const upload_endpoint = "http://127.0.0.1:8080/query";
 const polkasign_abi = "./abi/polkasign.contract";
-const polkasign_address = "5Eawr9kcGRks9kN36RGTQhpepLFCjenmsnCsvs27q8f55v3H";
+const polkasign_address = "5GfegVT1wheGfz87UZWxxLJvW9KynN9qzqfvYxaerjwa2P1j";
 
 console.log("contract ws: ", ws_endpoint);
 const provider = new WsProvider(ws_endpoint);

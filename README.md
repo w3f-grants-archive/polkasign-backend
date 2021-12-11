@@ -7,19 +7,22 @@ go run github.com/99designs/gqlgen generate
 
 ## start server
 ```bash
-nohup go run ./server.go &
+go build -o server ./server.go 
+nohup ./server &
 ```
 
 ## install npm modules
 ```bash
+cd subscriber
+nvm install 14.16.0
 nvm use 14.16.0
 npm install -g yarn
 yarn
 ```
 
-## start uploader
+## start subscriber
 ```bash
-cd uploader
+cd subscriber
 nohup node subscribe.js &
 ```
 
